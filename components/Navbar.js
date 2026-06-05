@@ -2,7 +2,7 @@ import React from "react";
 
 const Navbar = () => {
   return (
-    <nav className="bg-white w-[80vw] flex justify-between absolute top-10 right-[10vw] rounded-full p-3 px-7">
+    <nav className="bg-white w-[80vw] flex justify-between fixed top-10 right-[10vw] rounded-full p-3 px-7">
       <div className="logo flex gap-20 items-center">
         <img
           className="h-6"
@@ -20,8 +20,8 @@ const Navbar = () => {
       </div>
 
       <div className="flex gap-2">
-        <div className="login bg-gray-400 p-4 rounded-lg">Login</div>
-        <div className="signup bg-gray-900 text-white p-4 rounded-full">
+        <div className="login bg-gray-400 p-4 rounded-lg font-bold">Login</div>
+        <div className="signup bg-gray-900 text-white p-4 rounded-full font-bold">
           Sign up
         </div>
       </div>
