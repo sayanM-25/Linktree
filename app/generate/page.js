@@ -1,6 +1,42 @@
+"use client";
+
 import React from "react";
+import { useState } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Generate = () => {
+  // const notify = () => toast("Wow so easy !");
+
+  const [link, setLink] = useState("");
+  const [linktext, setLinktext] = useState("");
+  const [handle, setHandle] = useState("");
+  const [pic, setPic] = useState("");
+
+  const add_link = async (text, link, handle) => {
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+
+    const raw = JSON.stringify({
+      link: link,
+      linktext: text,
+      handle: handle,
+    });
+
+    const requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow",
+    };
+
+    const r = await fetch("http://localhost:3000/api/generate", requestOptions);
+    const result = await r.json();
+    toast(result.message);
+    setLink("");
+    setLinktext("");
+  };
+
   return (
     <div className="bg-[#d2e823] min-h-screen grid grid-cols-2">
       <div className="col1 flex justify-center items-center flex-col text-[#254f1c] ">
@@ -12,6 +48,10 @@ const Generate = () => {
             </h2>
             <div className="mx-4">
               <input
+                value={handle}
+                onChange={(e) => {
+                  setHandle(e.target.value);
+                }}
                 type="text"
                 className="px-4 py-2 my-2 bg-white focus:outline-white rounded-full"
                 placeholder="Choose a handle"
@@ -23,11 +63,19 @@ const Generate = () => {
             <h2 className="font-semibold text-2xl">Step-2: Add your links</h2>
             <div className="mx-4">
               <input
+                value={linktext}
+                onChange={(e) => {
+                  setLinktext(e.target.value);
+                }}
                 type="text"
                 className="px-4 py-2 my-2 bg-white focus:outline-white rounded-full"
                 placeholder="Enter link text"
               />
               <input
+                value={link}
+                onChange={(e) => {
+                  setLink(e.target.value);
+                }}
                 type="text"
                 className="px-4 py-2 mx-2 my-2 bg-white focus:outline-white rounded-full"
                 placeholder="Enter link "
@@ -44,11 +92,20 @@ const Generate = () => {
             </h2>
             <div className="mx-4 flex flex-col">
               <input
+                value={pic}
+                onChange={(e) => {
+                  setPic(e.target.value);
+                }}
                 type="text"
                 className="px-4 py-2 my-2 bg-white focus:outline-white rounded-full"
                 placeholder="Enter link to your picture"
               />
-              <button className="p-5 py-2 mx-2 w-fit my-5 bg-[#254f1c] text-white font-bold rounded-3xl">
+              <button
+                onClick={() => {
+                  add_link(linktext, link, handle);
+                }}
+                className="p-5 py-2 mx-2 w-fit my-5 bg-[#254f1c] text-white font-bold rounded-3xl"
+              >
                 Create your link
               </button>
             </div>
@@ -61,6 +118,7 @@ const Generate = () => {
           className="h-full w-full object-cover"
           alt="login_image"
         />
+        <ToastContainer />
       </div>
     </div>
   );
