@@ -12,6 +12,7 @@ const Generate = () => {
   const [links, setLinks] = useState([{ linktext: "", link: "" }]);
   const [handle, setHandle] = useState(searchParams.get("handle"));
   const [pic, setPic] = useState("");
+  const [desc, setDesc] = useState("");
 
   const handleChange = (index, linktext, link) => {
     setLinks((initialLinks) => {
@@ -37,9 +38,8 @@ const Generate = () => {
       links: links,
       handle: handle,
       pic: pic,
+      desc: desc,
     });
-
-    console.log(raw);
 
     const requestOptions = {
       method: "POST",
@@ -122,7 +122,7 @@ const Generate = () => {
 
           <div className="item">
             <h2 className="font-semibold text-2xl">
-              Step-3: Add a picture and finalize
+              Step-3: Add a picture and Description
             </h2>
             <div className="mx-4 flex flex-col">
               <input
@@ -133,6 +133,15 @@ const Generate = () => {
                 type="text"
                 className="px-4 py-2 my-2 bg-white focus:outline-white rounded-full"
                 placeholder="Enter link to your picture"
+              />
+              <input
+                value={desc || ""}
+                onChange={(e) => {
+                  setDesc(e.target.value);
+                }}
+                type="text"
+                className="px-4 py-2 my-2 bg-white focus:outline-white rounded-full"
+                placeholder="Enter description"
               />
               <button
                 disabled={pic == "" || handle == "" || links[0].linktext == ""}
