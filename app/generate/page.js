@@ -1,171 +1,230 @@
 "use client";
 
-import React from "react";
-import { useState } from "react";
+import Image from "next/image";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useSearchParams } from "next/navigation";
 
-const Generate = () => {
+const emptyLink = { linktext: "", link: "" };
+
+function GenerateForm() {
   const searchParams = useSearchParams();
-
-  const [links, setLinks] = useState([{ linktext: "", link: "" }]);
-  const [handle, setHandle] = useState(searchParams.get("handle"));
+  const [links, setLinks] = useState([emptyLink]);
+  const [handle, setHandle] = useState(searchParams.get("handle") || "");
   const [pic, setPic] = useState("");
   const [desc, setDesc] = useState("");
 
-  const handleChange = (index, linktext, link) => {
-    setLinks((initialLinks) => {
-      return initialLinks.map((item, i) => {
-        if (i == index) {
-          return { linktext, link };
-        } else {
-          return item;
-        }
-      });
-    });
+  const handleChange = (index, field, value) => {
+    setLinks((currentLinks) =>
+      currentLinks.map((link, linkIndex) =>
+        linkIndex === index ? { ...link, [field]: value } : link
+      )
+    );
   };
 
-  const add_link = () => {
-    setLinks(links.concat([{ linktext: "", link: "" }]));
+  const addLink = () => {
+    setLinks((currentLinks) => [...currentLinks, { ...emptyLink }]);
   };
+
+  const hasCompleteLink = links.some(
+    ({ linktext, link }) => linktext.trim() && link.trim()
+  );
+  const canSubmit = Boolean(handle.trim() && pic.trim() && hasCompleteLink);
 
   const submitLinks = async () => {
-    const myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
+    if (!canSubmit) return;
 
-    const raw = JSON.stringify({
-      links: links,
-      handle: handle,
-      pic: pic,
-      desc: desc,
-    });
+    try {
+      const response = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ links, handle: handle.trim(), pic: pic.trim(), desc }),
+      });
+      const result = await response.json();
 
-    const requestOptions = {
-      method: "POST",
-      headers: myHeaders,
-      body: raw,
-      redirect: "follow",
-    };
+      if (!response.ok || !result.success) {
+        toast.error(result.message || "Unable to create your Linktree.");
+        return;
+      }
 
-    const r = await fetch("http://localhost:3000/api/generate", requestOptions);
-    const result = await r.json();
-
-    if (result.success) {
       toast.success(result.message);
-      setLinks([]);
+      setLinks([{ ...emptyLink }]);
       setPic("");
+      setDesc("");
       setHandle("");
-    } else {
-      toast.error(result.message);
+    } catch {
+      toast.error("Unable to create your Linktree. Please try again.");
     }
   };
 
   return (
-    <div className="bg-[#d2e823] min-h-screen grid grid-cols-2">
-      <div className="col1 flex justify-center items-center flex-col text-[#254f1c] ">
-        <div className="flex flex-col gap-5 my-8">
-          <h1 className="font-bold text-4xl">Create your Linktree</h1>
-          <div className="item">
-            <h2 className="font-semibold text-2xl">
-              Step-1: Claim your handle
-            </h2>
-            <div className="mx-4">
-              <input
-                value={handle}
-                onChange={(e) => {
-                  setHandle(e.target.value);
-                }}
-                type="text"
-                className="px-4 py-2 my-2 bg-white focus:outline-white rounded-full"
-                placeholder="Choose a handle"
-              />
-            </div>
+    <main className="min-h-screen bg-[#f4f7ec] text-[#254f1c] lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(420px,0.8fr)]">
+      <section className="flex items-center justify-center px-5 py-10 sm:px-8 lg:px-14">
+        <div className="w-full max-w-xl">
+          <div className="mb-8">
+            <p className="mb-3 text-sm font-bold uppercase tracking-[0.18em] text-[#54734d]">
+              Get started
+            </p>
+            <h1 className="text-4xl font-black tracking-[-0.04em] sm:text-5xl">
+              Create your Linktree
+            </h1>
+            <p className="mt-3 max-w-md text-base leading-6 text-[#54734d]">
+              Add the links and details that help people find everything you do.
+            </p>
           </div>
 
-          <div className="item">
-            <h2 className="font-semibold text-2xl">Step-2: Add your links</h2>
-            {links &&
-              links.map((item, index) => {
-                return (
-                  <div key={index} className="mx-4">
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              submitLinks();
+            }}
+            className="space-y-5"
+          >
+            <section className="rounded-3xl border border-[#dce5d3] bg-white p-5 shadow-[0_8px_30px_rgba(37,79,28,0.08)] sm:p-6">
+              <div className="mb-5 flex items-start gap-3">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#d2e823] text-sm font-black">
+                  1
+                </span>
+                <div>
+                  <h2 className="text-lg font-bold">Choose your handle</h2>
+                  <p className="text-sm text-[#67805f]">This will be your Linktree address.</p>
+                </div>
+              </div>
+              <label className="flex items-center overflow-hidden rounded-2xl border-2 border-[#dbe4d3] bg-[#f8faf5] transition focus-within:border-[#254f1c] focus-within:bg-white">
+                <span className="pl-4 text-lg font-bold text-[#54734d]">@</span>
+                <input
+                  value={handle}
+                  onChange={(event) => setHandle(event.target.value)}
+                  type="text"
+                  className="w-full bg-transparent px-2 py-4 text-base font-semibold outline-none placeholder:font-normal placeholder:text-[#93a28d]"
+                  placeholder="yourname"
+                  aria-label="Linktree handle"
+                />
+              </label>
+            </section>
+
+            <section className="rounded-3xl border border-[#dce5d3] bg-white p-5 shadow-[0_8px_30px_rgba(37,79,28,0.08)] sm:p-6">
+              <div className="mb-5 flex items-start gap-3">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#d2e823] text-sm font-black">
+                  2
+                </span>
+                <div>
+                  <h2 className="text-lg font-bold">Add your links</h2>
+                  <p className="text-sm text-[#67805f]">Give each destination a clear title.</p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {links.map((link, index) => (
+                  <div key={index} className="rounded-2xl border border-[#e4eadf] bg-[#f8faf5] p-3">
+                    <label className="sr-only" htmlFor={`link-title-${index}`}>
+                      Link title
+                    </label>
                     <input
-                      value={item.linktext}
-                      onChange={(e) => {
-                        handleChange(index, e.target.value, item.link);
-                      }}
+                      id={`link-title-${index}`}
+                      value={link.linktext}
+                      onChange={(event) =>
+                        handleChange(index, "linktext", event.target.value)
+                      }
                       type="text"
-                      className="px-4 py-2 my-2 bg-white focus:outline-white rounded-full"
-                      placeholder="Enter link text"
+                      className="w-full border-b border-[#dce5d3] bg-transparent px-2 py-2.5 text-base font-semibold outline-none placeholder:font-normal placeholder:text-[#93a28d] focus:border-[#254f1c]"
+                      placeholder="Link title"
                     />
+                    <label className="sr-only" htmlFor={`link-url-${index}`}>
+                      Link URL
+                    </label>
                     <input
-                      value={item.link}
-                      onChange={(e) => {
-                        handleChange(index, item.linktext, e.target.value);
-                      }}
-                      type="text"
-                      className="px-4 py-2 mx-2 my-2 bg-white focus:outline-white rounded-full"
-                      placeholder="Enter link "
+                      id={`link-url-${index}`}
+                      value={link.link}
+                      onChange={(event) => handleChange(index, "link", event.target.value)}
+                      type="url"
+                      className="w-full bg-transparent px-2 py-2.5 text-sm outline-none placeholder:text-[#93a28d]"
+                      placeholder="https://your-link.com"
                     />
                   </div>
-                );
-              })}
-            <button
-              onClick={() => {
-                add_link();
-              }}
-              className="p-5 py-2 mx-2 w-fit my-5 bg-[#254f1c] text-white font-bold rounded-3xl"
-            >
-              + Add link
-            </button>
-          </div>
+                ))}
+              </div>
 
-          <div className="item">
-            <h2 className="font-semibold text-2xl">
-              Step-3: Add a picture and Description
-            </h2>
-            <div className="mx-4 flex flex-col">
-              <input
-                value={pic || ""}
-                onChange={(e) => {
-                  setPic(e.target.value);
-                }}
-                type="text"
-                className="px-4 py-2 my-2 bg-white focus:outline-white rounded-full"
-                placeholder="Enter link to your picture"
-              />
-              <input
-                value={desc || ""}
-                onChange={(e) => {
-                  setDesc(e.target.value);
-                }}
-                type="text"
-                className="px-4 py-2 my-2 bg-white focus:outline-white rounded-full"
-                placeholder="Enter description"
-              />
               <button
-                disabled={pic == "" || handle == "" || links[0].linktext == ""}
-                onClick={() => {
-                  submitLinks();
-                }}
-                className="disabled:bg-slate-500 p-5 py-2 mx-2 w-fit my-5 bg-[#254f1c] text-white font-bold rounded-3xl"
+                type="button"
+                onClick={addLink}
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-full border-2 border-[#254f1c] px-5 py-3.5 text-sm font-bold transition hover:bg-[#edf3e6] active:scale-[0.99]"
               >
-                Create your linkTree
+                <span className="text-xl leading-none">+</span>
+                Add link
               </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="col2 w-full h-screen ">
-        <img
-          src="/generate.webp"
-          className="h-full w-full object-cover"
-          alt="login_image"
-        />
-        <ToastContainer />
-      </div>
-    </div>
-  );
-};
+            </section>
 
-export default Generate;
+            <section className="rounded-3xl border border-[#dce5d3] bg-white p-5 shadow-[0_8px_30px_rgba(37,79,28,0.08)] sm:p-6">
+              <div className="mb-5 flex items-start gap-3">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#d2e823] text-sm font-black">
+                  3
+                </span>
+                <div>
+                  <h2 className="text-lg font-bold">Add your profile</h2>
+                  <p className="text-sm text-[#67805f]">Personalize your page with a photo and bio.</p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <label className="sr-only" htmlFor="profile-picture">
+                  Profile picture URL
+                </label>
+                <input
+                  id="profile-picture"
+                  value={pic}
+                  onChange={(event) => setPic(event.target.value)}
+                  type="url"
+                  className="w-full rounded-2xl border-2 border-[#dbe4d3] bg-[#f8faf5] px-4 py-3.5 text-base outline-none transition placeholder:text-[#93a28d] focus:border-[#254f1c] focus:bg-white"
+                  placeholder="Profile picture URL"
+                />
+                <label className="sr-only" htmlFor="profile-description">
+                  Description
+                </label>
+                <input
+                  id="profile-description"
+                  value={desc}
+                  onChange={(event) => setDesc(event.target.value)}
+                  type="text"
+                  className="w-full rounded-2xl border-2 border-[#dbe4d3] bg-[#f8faf5] px-4 py-3.5 text-base outline-none transition placeholder:text-[#93a28d] focus:border-[#254f1c] focus:bg-white"
+                  placeholder="A short description about you"
+                />
+              </div>
+            </section>
+
+            <button
+              type="submit"
+              disabled={!canSubmit}
+              className="w-full rounded-full bg-[#254f1c] px-6 py-4 text-base font-bold text-white shadow-[0_8px_20px_rgba(37,79,28,0.2)] transition hover:-translate-y-0.5 hover:bg-[#173d10] active:translate-y-0 disabled:cursor-not-allowed disabled:bg-[#9caf96] disabled:shadow-none"
+            >
+              Create your Linktree
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <aside className="relative hidden min-h-screen items-center justify-center overflow-hidden bg-[#2665d6] p-10 lg:flex">
+        <div className="absolute left-10 top-10 h-24 w-24 rounded-full bg-[#d2e823] opacity-90" />
+        <div className="absolute bottom-12 right-12 h-16 w-16 rounded-full bg-[#ff7a00]" />
+        <Image
+          src="/generate.webp"
+          width={1024}
+          height={1920}
+          priority
+          className="relative z-10 max-h-[780px] w-full max-w-md object-contain"
+          alt="A Linktree creator sharing their content across platforms"
+        />
+      </aside>
+      <ToastContainer position="top-center" />
+    </main>
+  );
+}
+
+export default function GeneratePage() {
+  return (
+    <Suspense fallback={<main className="min-h-screen bg-[#f4f7ec]" />}>
+      <GenerateForm />
+    </Suspense>
+  );
+}

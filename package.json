@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "ensure-handle-index": "node --env-file=.env scripts/ensure-handle-index.mjs"
   },
   "dependencies": {
     "mongodb": "^7.5.0",
