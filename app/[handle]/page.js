@@ -2,6 +2,8 @@ import clientPromise from "@/lib/mongodb";
 import { HANDLE_COLLATION, validateHandle } from "@/lib/linktree";
 import { notFound } from "next/navigation";
 
+/* eslint-disable @next/next/no-img-element -- profile image hosts are user supplied and validated server-side. */
+
 export default async function Page({ params }) {
   const { handle: rawHandle } = await params;
   const handleValidation = validateHandle(rawHandle);

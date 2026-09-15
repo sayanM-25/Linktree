@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useState } from "react";
 
 export default function Home() {
@@ -91,8 +92,10 @@ export default function Home() {
           </div>
         </div>
         <div className="flex items-center justify-center px-6 py-10 lg:mr-[10vw]">
-          <img
+          <Image
             src="/generate.webp"
+            width={1024}
+            height={1920}
             alt="Linktree creator sharing their content across platforms"
             className="w-full max-w-md object-contain"
           />

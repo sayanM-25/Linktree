@@ -18,8 +18,8 @@ function GenerateForm() {
   const handleChange = (index, field, value) => {
     setLinks((currentLinks) =>
       currentLinks.map((link, linkIndex) =>
-        linkIndex === index ? { ...link, [field]: value } : link
-      )
+        linkIndex === index ? { ...link, [field]: value } : link,
+      ),
     );
   };
 
@@ -28,7 +28,7 @@ function GenerateForm() {
   };
 
   const hasCompleteLink = links.some(
-    ({ linktext, link }) => linktext.trim() && link.trim()
+    ({ linktext, link }) => linktext.trim() && link.trim(),
   );
   const canSubmit = Boolean(handle.trim() && pic.trim() && hasCompleteLink);
 
@@ -39,7 +39,12 @@ function GenerateForm() {
       const response = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ links, handle: handle.trim(), pic: pic.trim(), desc }),
+        body: JSON.stringify({
+          links,
+          handle: handle.trim(),
+          pic: pic.trim(),
+          desc,
+        }),
       });
       const result = await response.json();
 
@@ -88,7 +93,9 @@ function GenerateForm() {
                 </span>
                 <div>
                   <h2 className="text-lg font-bold">Choose your handle</h2>
-                  <p className="text-sm text-[#67805f]">This will be your Linktree address.</p>
+                  <p className="text-sm text-[#67805f]">
+                    This will be your Linktree address.
+                  </p>
                 </div>
               </div>
               <label className="flex items-center overflow-hidden rounded-2xl border-2 border-[#dbe4d3] bg-[#f8faf5] transition focus-within:border-[#254f1c] focus-within:bg-white">
@@ -111,13 +118,18 @@ function GenerateForm() {
                 </span>
                 <div>
                   <h2 className="text-lg font-bold">Add your links</h2>
-                  <p className="text-sm text-[#67805f]">Give each destination a clear title.</p>
+                  <p className="text-sm text-[#67805f]">
+                    Give each destination a clear title.
+                  </p>
                 </div>
               </div>
 
               <div className="space-y-3">
                 {links.map((link, index) => (
-                  <div key={index} className="rounded-2xl border border-[#e4eadf] bg-[#f8faf5] p-3">
+                  <div
+                    key={index}
+                    className="rounded-2xl border border-[#e4eadf] bg-[#f8faf5] p-3"
+                  >
                     <label className="sr-only" htmlFor={`link-title-${index}`}>
                       Link title
                     </label>
@@ -137,7 +149,9 @@ function GenerateForm() {
                     <input
                       id={`link-url-${index}`}
                       value={link.link}
-                      onChange={(event) => handleChange(index, "link", event.target.value)}
+                      onChange={(event) =>
+                        handleChange(index, "link", event.target.value)
+                      }
                       type="url"
                       className="w-full bg-transparent px-2 py-2.5 text-sm outline-none placeholder:text-[#93a28d]"
                       placeholder="https://your-link.com"
@@ -163,7 +177,9 @@ function GenerateForm() {
                 </span>
                 <div>
                   <h2 className="text-lg font-bold">Add your profile</h2>
-                  <p className="text-sm text-[#67805f]">Personalize your page with a photo and bio.</p>
+                  <p className="text-sm text-[#67805f]">
+                    Personalize your page with a photo and bio.
+                  </p>
                 </div>
               </div>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
@@ -18,10 +19,12 @@ export default function Navbar() {
   return (
     <nav className="sticky top-3 z-50 mx-auto mt-3 flex w-[calc(100%-1.5rem)] max-w-6xl items-center justify-between rounded-full bg-white p-3 shadow-[0_8px_24px_rgba(37,79,28,0.12)] sm:top-4 sm:mt-4 sm:w-[calc(100%-3rem)] sm:px-6">
       <Link href="/" onClick={closeMenu} className="shrink-0">
-        <img
-          className="h-6"
-          loading="eager"
+        <Image
+          className="h-6 w-auto"
           src="https://cdn.prod.website-files.com/666255f7f2126f4e8cec6f8f/66634daccb34e6d65a41c76d_download.svg"
+          width={120}
+          height={24}
+          priority
           alt="Linktree"
         />
       </Link>
